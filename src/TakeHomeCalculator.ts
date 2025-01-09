@@ -1,47 +1,39 @@
 export class TakeHomeCalculator {
-  private readonly percent: number;
+  private readonly taxRate: number;
 
   constructor(percent: number) {
-    this.percent = percent;
+    this.taxRate = percent;
   }
+
+  
 
   netAmount(
-    first: Pair<number, string>,
-    ...rest: Pair<number, string>[]
-  ): Pair<number, string> {
-    let pairs: Pair<number, string>[] = Array.from(rest);
+    first: amountAndCurrency,
+    ...moneyValues: amountAndCurrency[]
+  ): amountAndCurrency {
 
-    let total: Pair<number, string> = first;
+    let total = first.amount;
+    const currency = first.currency;
+    //40, GBP
 
-    for (let next of pairs) {
-      if (next.second != total.second) {
-        throw new Incalculable();
+    for (let next of moneyValues) {
+      if (next.currency != currency) {
+        throw new currencyIsNotEqual();
       }
+      total = (total + next.amount);
+
     }
 
-    for (let next of pairs) {
-      total = new Pair<number, string>(total.first + next.first, next.second);
-    }
-
-    let amount: number = total.first * (this.percent / 100);
-    let tax = new Pair<number, string>(amount, first.second);
-
-    if (total.second == tax.second) {
-      return new Pair<number, string>(total.first - tax.first, first.second);
-    } else {
-      throw new Incalculable();
-    }
+    let taxAmount: number = total * (this.taxRate / 100);
+    return new amountAndCurrency(total - taxAmount, first.currency);
   }
 }
 
-export class Pair<A, B> {
-  first: A;
-  second: B;
+export class amountAndCurrency {
 
-  constructor(first: A, second: B) {
-    this.first = first;
-    this.second = second;
+
+  constructor(public amount: number, public currency: string) {
   }
 }
 
-export class Incalculable extends Error {}
+export class currencyIsNotEqual extends Error {}

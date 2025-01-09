@@ -1,21 +1,25 @@
-import { Incalculable, Pair, TakeHomeCalculator } from './TakeHomeCalculator';
+import { CurrencyMismatchError, type AmountAndCurrency, TakeHomeCalculator } from './TakeHomeCalculator';
 
-describe('TakeHomeCalculator', function () {
+describe('TakeHomeCalculator', () => {
   it('can calculate tax', () => {
-    let first = new TakeHomeCalculator(10).netAmount(
-      new Pair<number, string>(40, 'GBP'),
-      new Pair<number, string>(50, 'GBP'),
-      new Pair<number, string>(60, 'GBP')
-    ).first;
-    expect(first).toEqual(135);
+    const calculator = new TakeHomeCalculator(10);
+    const result = calculator.netAmount(
+      { amount: 40, currency: 'GBP' },
+      { amount: 50, currency: 'GBP' },
+      { amount: 60, currency: 'GBP' }
+    ).amount;
+    
+    expect(result).toEqual(135);
   });
 
   it('cannot sum different currencies', () => {
+    const calculator = new TakeHomeCalculator(10);
+    
     expect(() =>
-      new TakeHomeCalculator(10).netAmount(
-        new Pair<number, string>(40, 'GBP'),
-        new Pair<number, string>(50, 'USD')
+      calculator.netAmount(
+        { amount: 40, currency: 'GBP' },
+        { amount: 50, currency: 'USD' }
       )
-    ).toThrow(Incalculable);
+    ).toThrow(CurrencyMismatchError);
   });
 });
